@@ -1,0 +1,28 @@
+name: Build dirtyfrag APK
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install NDK
+        run: sdkmanager --install "ndk;30.0.16138531" "platforms;android-34" "build-tools;34.0.0"
+      - name: Build Debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          ls -R app/build/outputs/
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dirtyfrag-apk
+          path: app/build/outputs/apk/debug/*.apk
